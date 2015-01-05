@@ -1,4 +1,5 @@
 require 'thor'
+require 'io/console'
 
 module Kitchenplan
   class Cli < Thor
@@ -61,8 +62,11 @@ module Kitchenplan
       Process.detach pid
       prepare_folders(targetdir)
       install_bundler(targetdir)
-      recipes = parse_config(targetdir)
+      recipes, attributes, input_attributes, input_secret_attributes = parse_config()
+      collect_user_inputs(input_attributes, input_secret_attributes, attributes)
+      write_config(attributes, targetdir)
       fetch_cookbooks(targetdir, options[:debug]) unless options['no-fetch']
+      #collect_user_inputs
       run_chef(targetdir, (options[:recipes] ? options[:recipes] : recipes), options[:solorb], options[:debug])
       cleanup(targetdir, options[:debug])
       Process.kill(9, pid)
@@ -100,21 +104,25 @@ module Kitchenplan
         end
       end
 
-      def parse_config(targetdir)
+      def parse_config()
         print_step('Compiling configurations')
-        require 'json'
         require 'kitchenplan/config'
+	config = Kitchenplan::Config.new
+	return config.config['recipes'], config.config['attributes'], config.config['input_attributes'], config.config['input_secret_attributes']
+      end
+
+      def write_config(attributes, targetdir)
+	print_step('Writing configuration files')
+	require 'json'
         inside("#{targetdir}/kitchenplan") do
-          config = Kitchenplan::Config.new
           dorun('mkdir -p tmp')
           File.open('tmp/kitchenplan-attributes.json', 'w') do |out|
-            out.write(JSON.pretty_generate(config.config['attributes']))
+	    out.write(JSON.pretty_generate(attributes))
           end
           File.open('tmp/solo.rb', 'w') do |out|
             out.write("cookbook_path      [ \"#{Dir.pwd}/vendor/cookbooks\" ]\n")
             out.write("ssl_verify_mode :verify_peer")
           end
-          return config.config['recipes']
         end
       end
 
@@ -230,6 +238,39 @@ module Kitchenplan
         print_step("Making sure #{targetdir} exists and I can write to it")
         dorun("sudo mkdir -p #{targetdir}")
         dorun("sudo chown -R #{ENV['USER']} #{targetdir}")
+      end
+
+      def collect_user_inputs(input_attributes, input_secret_attributes, attributes)
+	print_step("Collecting required user input")
+	read_input_attributes(input_attributes)
+	read_input_attributes(input_secret_attributes, false)
+
+	require 'kitchenplan/config'
+	Kitchenplan::Config.deep_merge_configs(input_attributes, attributes)
+	Kitchenplan::Config.deep_merge_configs(input_secret_attributes, attributes)
+      end
+
+      # http://stackoverflow.com/a/15976810 - using this right now, not allowing arrays
+      # http://stackoverflow.com/a/16413593 - for allowing arrays
+      def read_input_attributes(hash, show_input=true)
+	hash.each_pair do |key,value|
+	  if value.is_a?(Hash)
+	    read_input_attributes(value, show_input)
+	  else
+	    prompt = "Enter your #{key}"
+	    prompt += " (or leave blank to use '#{value}')" if value && !value.empty?
+	    input = read_input(prompt, show_input)
+	    hash[key] = input && !input.empty? ? input : value
+	  end
+	end
+      end
+
+      def read_input(prompt, show_input=true, force_new_line=false)
+	say "#{prompt}: ", :blue, force_new_line
+	input = show_input ? STDIN.gets.chomp : STDIN.noecho(&:gets).chomp
+	say "" if !show_input
+	say "Input entered was '#{input}'"  # TODO delete this, for debugging only
+	return input
       end
 
       def dorun(command, capture=false)

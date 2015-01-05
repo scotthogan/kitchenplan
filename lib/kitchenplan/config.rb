@@ -80,32 +80,48 @@ module Kitchenplan
       people_recipes = @people_config['recipes'] || {}
       config['recipes'] |= people_recipes['global'] || []
       config['recipes'] |= people_recipes[@platform] || []
-          
-      system_recipes = @system_config['recipes'] || {}  
+
+      system_recipes = @system_config['recipes'] || {}
       config['recipes'] |= system_recipes['global'] || []
       config['recipes'] |= system_recipes[@platform] || []
 
-      # First take the attributes from default.yml
-      config['attributes'] = {}
-      config['attributes'].deep_merge!(@default_config['attributes'] || {}) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+      set_overridden_config(config, 'attributes')
 
-      # then override and extend them with the group attributes
-      @group_configs.each do |group_name, group_config|
-        config['attributes'].deep_merge!(group_config['attributes']) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config['attributes'].nil?
-      end
+      # TODO how should these attributes interact with those defined in normal attribute section? order of overriding?
+      set_overridden_config(config, 'input_attributes')
+      set_overridden_config(config, 'input_secret_attributes')
 
-      # then override and extend them with the people attributes
-      people_attributes = @people_config['attributes'] || {}
-      config['attributes'].deep_merge!(people_attributes) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
-
-      # lastly override from the system files
-      system_attributes = @system_config['attributes'] || {}
-      config['attributes'].deep_merge!(system_attributes) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+      # now set the collected user attributes into the attributes hash
+      #TODO delte this, or make it inherit from the attributes in some logical precedence
+      #deep_merge_configs(config['input_attributes'], config['attributes'])
+      #deep_merge_configs(config['input_secret_attributes'], config['attributes'])
 
       config
     end
 
     private
+
+    def set_overridden_config(config, config_key)
+      # First take the values from default.yml
+      config[config_key] = {} unless config[config_key]
+      Config.deep_merge_configs(@default_config[config_key], config[config_key])
+
+      # then override and extend them with the group values
+      @group_configs.each do |group_name, group_config|
+	config[config_key].deep_merge!(group_config[config_key]) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config[config_key].nil?
+      end
+
+      # then override and extend them with the people values
+      Config.deep_merge_configs(@people_config[config_key], config[config_key])
+
+      # lastly override from the system files
+      Config.deep_merge_configs(@system_config[config_key], config[config_key])
+    end
+
+    def self.deep_merge_configs(src, dest)
+      src = src || {}
+      dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+    end
 
     # Fetches the value at a path in a nested hash or nil if the path is not present.
     def hash_path(hash, *path)
