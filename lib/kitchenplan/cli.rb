@@ -269,7 +269,7 @@ module Kitchenplan
 	say "#{prompt}: ", :blue, force_new_line
 	input = show_input ? STDIN.gets.chomp : STDIN.noecho(&:gets).chomp
 	say "" if !show_input
-	say "Input entered was '#{input}'"  # TODO delete this, for debugging only
+	#say "Input entered was '#{input}'"  # TODO delete this, for debugging only
 	return input
       end
 
