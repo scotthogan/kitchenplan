@@ -4,8 +4,8 @@ require 'etc'
 require 'erb'
 require 'deep_merge'
 require 'securerandom'
-# Used for debugging
-require 'io/console'
+# Used for data bag stuff
+require 'json'
 
 module Kitchenplan
 
@@ -30,7 +30,7 @@ module Kitchenplan
       #ohai.require_plugin('os')
       #ohai.require_plugin('platform')
       #@platform = ohai[:platform_family]
-      @platform = 'mac_os_x' # We only support osx at the moment, and it saves a large dependency
+      @platform = 'mac_os_x' # We only support osx at the moment, and it ves a large dependency
     end
 
    def hardware_model
@@ -126,8 +126,12 @@ module Kitchenplan
       unless src.nil?
         # Creates the key and puts it in the json for now and creates an 
         # encrypted data bag with that key
-        new_src = {src.keys[0] => { src.values[0].keys[0] => SecureRandom.uuid}}
-        # TODO: Create a dat bag based on the above key
+        new_src = {src.keys[0] => { src.values[0].keys[0] => SecureRandom.base64(40)}}
+
+        puts("knife vault create secret_vault secret_attributes '#{src.to_json}' -z")        
+        system("knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
+
+        # TODO: Create a data bag based on the above key
         puts new_src
       end
 
