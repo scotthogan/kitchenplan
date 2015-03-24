@@ -3,6 +3,9 @@ require 'etc'
 #require 'ohai'
 require 'erb'
 require 'deep_merge'
+require 'securerandom'
+# Used for debugging
+require 'io/console'
 
 module Kitchenplan
 
@@ -89,6 +92,7 @@ module Kitchenplan
 
       # TODO how should these attributes interact with those defined in normal attribute section? order of overriding?
       set_overridden_config(config, 'input_attributes')
+      # Special thing
       set_overridden_config(config, 'input_secret_attributes')
 
       # now set the collected user attributes into the attributes hash
@@ -104,24 +108,43 @@ module Kitchenplan
     def set_overridden_config(config, config_key)
       # First take the values from default.yml
       config[config_key] = {} unless config[config_key]
+    
       Config.deep_merge_configs(@default_config[config_key], config[config_key])
 
       # then override and extend them with the group values
       @group_configs.each do |group_name, group_config|
-	config[config_key].deep_merge!(group_config[config_key]) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config[config_key].nil?
+	      config[config_key].deep_merge!(group_config[config_key]) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config[config_key].nil?
       end
-
+  
       # then override and extend them with the people values
       Config.deep_merge_configs(@people_config[config_key], config[config_key])
-
       # lastly override from the system files
       Config.deep_merge_configs(@system_config[config_key], config[config_key])
+    end
+
+    def self.create_key_with_data_bag(src)
+      unless src.nil?
+        # Creates the key and puts it in the json for now and creates an 
+        # encrypted data bag with that key
+        new_src = {src.keys[0] => { src.values[0].keys[0] => SecureRandom.uuid}}
+        # TODO: Create a dat bag based on the above key
+        puts new_src
+      end
+
+      return new_src
     end
 
     def self.deep_merge_configs(src, dest)
       src = src || {}
       dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
     end
+
+    # Creates a key and stores it in the attributes json file
+    def self.deep_merge_secret_configs(src, dest)
+      src = create_key_with_data_bag(src) || {}
+      dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
+      puts src
+    end 
 
     # Fetches the value at a path in a nested hash or nil if the path is not present.
     def hash_path(hash, *path)

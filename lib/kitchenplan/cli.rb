@@ -107,8 +107,8 @@ module Kitchenplan
       def parse_config()
         print_step('Compiling configurations')
         require 'kitchenplan/config'
-	config = Kitchenplan::Config.new
-	return config.config['recipes'], config.config['attributes'], config.config['input_attributes'], config.config['input_secret_attributes']
+    	config = Kitchenplan::Config.new
+    	return config.config['recipes'], config.config['attributes'], config.config['input_attributes'], config.config['input_secret_attributes']
       end
 
       def write_config(attributes, targetdir)
@@ -241,36 +241,36 @@ module Kitchenplan
       end
 
       def collect_user_inputs(input_attributes, input_secret_attributes, attributes)
-	print_step("Collecting required user input")
-	read_input_attributes(input_attributes)
-	read_input_attributes(input_secret_attributes, false)
-
-	require 'kitchenplan/config'
-	Kitchenplan::Config.deep_merge_configs(input_attributes, attributes)
-	Kitchenplan::Config.deep_merge_configs(input_secret_attributes, attributes)
+    	print_step("Collecting required user input")
+    	read_input_attributes(input_attributes)
+    	read_input_attributes(input_secret_attributes, false)
+    	require 'kitchenplan/config'
+    	Kitchenplan::Config.deep_merge_configs(input_attributes, attributes)
+        # Use a special function for the secret attribs
+    	Kitchenplan::Config.deep_merge_secret_configs(input_secret_attributes, attributes)
       end
 
       # http://stackoverflow.com/a/15976810 - using this right now, not allowing arrays
       # http://stackoverflow.com/a/16413593 - for allowing arrays
       def read_input_attributes(hash, show_input=true)
-	hash.each_pair do |key,value|
-	  if value.is_a?(Hash)
-	    read_input_attributes(value, show_input)
-	  else
-	    prompt = "Enter your #{key}"
-	    prompt += " (or leave blank to use '#{value}')" if value && !value.empty?
-	    input = read_input(prompt, show_input)
-	    hash[key] = input && !input.empty? ? input : value
-	  end
-	end
+    	hash.each_pair do |key,value|
+    	  if value.is_a?(Hash)
+    	    read_input_attributes(value, show_input)
+    	  else
+    	    prompt = "Enter your #{key}"
+    	    prompt += " (or leave blank to use '#{value}')" if value && !value.empty?
+    	    input = read_input(prompt, show_input)
+    	    hash[key] = input && !input.empty? ? input : value
+    	  end
+    	end
       end
 
       def read_input(prompt, show_input=true, force_new_line=false)
-	say "#{prompt}: ", :blue, force_new_line
-	input = show_input ? STDIN.gets.chomp : STDIN.noecho(&:gets).chomp
-	say "" if !show_input
-	#say "Input entered was '#{input}'"  # TODO delete this, for debugging only
-	return input
+    	say "#{prompt}: ", :blue, force_new_line
+    	input = show_input ? STDIN.gets.chomp : STDIN.noecho(&:gets).chomp
+    	say "" if !show_input
+    	#say "Input entered was '#{input}'"  # TODO delete this, for debugging only
+    	return input
       end
 
       def dorun(command, capture=false)
