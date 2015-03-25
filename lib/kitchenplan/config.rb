@@ -124,18 +124,25 @@ module Kitchenplan
 
     def self.create_key_with_data_bag(src)
       unless src.nil?
-        # Creates the key and puts it in the json for now and creates an 
-        # encrypted data bag with that key
-        new_src = {src.keys[0] => { src.values[0].keys[0] => SecureRandom.base64(40)}}
+        # Create a user in knife. For some reason it didn't want to accept one that i made externally
+        puts("Running Command: sudo knife user create devadmin -f /Users/devadmin/.chef/devadmin.pem -p password -z")
+        system("sudo knife user create devadmin -f /Users/devadmin/.chef/devadmin.pem -p password -z")     
 
-        puts("knife vault create secret_vault secret_attributes '#{src.to_json}' -z")        
+        # Actaully create the vault that is used :D
+        puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z") 
         system("knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
 
-        # TODO: Create a data bag based on the above key
-        puts new_src
+        src.each do |key, array|
+          array.each do |key2, array2|
+            src[key][key2] = " "
+          end
+        end
+
+        # Return just the keys since that is all we care about.
+        puts src
       end
 
-      return new_src
+      return src
     end
 
     def self.deep_merge_configs(src, dest)
