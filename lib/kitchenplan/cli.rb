@@ -16,7 +16,7 @@ module Kitchenplan
     prompt, pass it along on the commandline. (see .travis.yml for an example)
     LONGDESC
     def setup(targetdir='/opt')
-     gitrepo = options[:gitrepo]
+      gitrepo = options[:gitrepo]
       logo
       install_clt unless File.exist? "/Library/Developer/CommandLineTools/usr/bin/clang"
       if gitrepo || File.exists?("#{targetdir}/kitchenplan")

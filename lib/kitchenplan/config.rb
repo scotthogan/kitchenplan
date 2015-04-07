@@ -33,9 +33,9 @@ module Kitchenplan
       @platform = 'mac_os_x' # We only support osx at the moment, and it ves a large dependency
     end
 
-   def hardware_model
+    def hardware_model
       `sysctl -n hw.model | tr -d '\n'`
-   end
+    end
 
     def parse_default_config
       default_config_path = 'config/default.yml'
@@ -108,14 +108,14 @@ module Kitchenplan
     def set_overridden_config(config, config_key)
       # First take the values from default.yml
       config[config_key] = {} unless config[config_key]
-    
+
       Config.deep_merge_configs(@default_config[config_key], config[config_key])
 
       # then override and extend them with the group values
       @group_configs.each do |group_name, group_config|
-	      config[config_key].deep_merge!(group_config[config_key]) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config[config_key].nil?
+        config[config_key].deep_merge!(group_config[config_key]) { |key, old, new| Array.wrap(old) + Array.wrap(new) } unless group_config[config_key].nil?
       end
-  
+
       # then override and extend them with the people values
       Config.deep_merge_configs(@people_config[config_key], config[config_key])
       # lastly override from the system files
