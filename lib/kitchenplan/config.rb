@@ -125,8 +125,9 @@ module Kitchenplan
     def self.create_key_with_data_bag(src)
       unless src.nil?
         # Create a user in knife. For some reason it didn't want to accept one that i made externally
+        system("sudo vendor/bin/knife configure")
+
         puts("Running Command: sudo knife user create devadmin -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")
-        system("sudo vendor/bin/knife user delete #{ENV['USER']}")
         system("sudo vendor/bin/knife user create #{ENV['USER']} -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")     
 
         # Actaully create the vault that is used :D
