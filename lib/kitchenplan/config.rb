@@ -125,16 +125,19 @@ module Kitchenplan
     def self.create_key_with_data_bag(src)
       unless src.nil?
         # Create a user in knife. For some reason it didn't want to accept one that i made externally
-        puts("Running Command: sudo knife user create devadmin -f /Users/devadmin/.chef/devadmin.pem -p password -z")
-        system("sudo knife user create devadmin -f /Users/devadmin/.chef/devadmin.pem -p password -z")     
+        puts("Running Command: sudo knife user create devadmin -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")
+        system("sudo knife user delete #{ENV['USER']}")
+        system("sudo knife user create #{ENV['USER']} -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")     
 
         # Actaully create the vault that is used :D
-        puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z") 
-        system("knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
+        puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
+        system("knife vault delete secret_vault secret_attributes -z")
+        system("knife vault create secret_vault secret_attributes '#{src.to_json}' -z -A #{ENV['USER']}")
+        puts("Test")
 
         src.each do |key, array|
           array.each do |key2, array2|
-            src[key][key2] = " "
+            src[key][key2] = ""
           end
         end
 
