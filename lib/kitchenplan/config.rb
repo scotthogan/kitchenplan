@@ -127,7 +127,7 @@ module Kitchenplan
 
         system("sudo EDITOR=vim")
         # Configure knife!
-        system("sudo vendor/bin/knife configure")
+        system("sudo vendor/bin/knife configure -z")
         
         # Create a user in knife. For some reason it didn't want to accept one that i made externally
         puts("Running Command: sudo knife user create devadmin -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")
