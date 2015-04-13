@@ -125,7 +125,7 @@ module Kitchenplan
     def self.create_key_with_data_bag(src)
       unless src.nil?
 
-        system("sudo EDITOR=vim")
+        system("EDITOR=vim")
         # Configure knife!
         system("sudo vendor/bin/knife configure -z")
         
