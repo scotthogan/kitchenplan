@@ -126,7 +126,7 @@ module Kitchenplan
       unless src.nil?
 
         # Create a pem file!
-        system("sudo ssh-keygen -q -P=\"password\" -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem")
+        system("sudo mkdir -p /Users/#{ENV['USERS']}/.chef/ && ssh-keygen -q -P=\"password\" -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem")
 
         # Configure knife!
         system("sudo vendor/bin/knife configure -z")
