@@ -125,7 +125,7 @@ module Kitchenplan
     def self.create_key_with_data_bag(src)
       unless src.nil?
         # The temp var to store the pass
-        srcPass
+        srcPass = ""
 
         src.each do |key, array|
           array.each do |key2, array2|
