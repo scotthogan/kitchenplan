@@ -165,7 +165,8 @@ module Kitchenplan
         system("curl --user jdeibel -LOk #{gitrepo}/archive/master.zip")
         system("unzip master.zip")
         system("rm master.zip")
-        system("cp -r kitchenplan-config-master/ .")
+        system("sudo mkdir -p #{targetdir}/kitchenplan")
+        system("cp -r kitchenplan-config-master/ #{targetdir}/kitchenplan")
         system("rm -rf kitchenplan-config-master")
       end
 
