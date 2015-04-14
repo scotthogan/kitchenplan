@@ -166,7 +166,7 @@ module Kitchenplan
         system("unzip master.zip")
         system("rm master.zip")
         system("sudo mkdir -p #{targetdir}/kitchenplan")
-        system("cp -r kitchenplan-config-master/ #{targetdir}/kitchenplan")
+        system("sudo cp -r kitchenplan-config-master/ #{targetdir}/kitchenplan")
         system("rm -rf kitchenplan-config-master")
       end
 
