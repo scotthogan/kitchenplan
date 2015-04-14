@@ -124,6 +124,16 @@ module Kitchenplan
 
     def self.create_key_with_data_bag(src)
       unless src.nil?
+        # The temp var to store the pass
+        srcPass
+
+        src.each do |key, array|
+          array.each do |key2, array2|
+            srcPass = src[key][key2]
+            src[key][key2] = ""
+          end
+        end
+
         # Configure knife!
         system("sudo vendor/bin/knife configure -z")
         
@@ -132,16 +142,10 @@ module Kitchenplan
         system("sudo vendor/bin/knife user create #{ENV['USER']} -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -e vim -a -p password -z")     
 
         # Actaully create the vault that is used :D
-        puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
+        puts("Running Command: knife vault create secret_vault secret_attributes '#{srcPass}' -z")
         system("sudo vendor/bin/knife vault delete secret_vault secret_attributes -z")
-        system("sudo vendor/bin/knife vault create secret_vault secret_attributes '#{src.to_json}' -z -A #{ENV['USER']}")
+        system("sudo vendor/bin/knife vault create secret_vault secret_attributes '#{srcPass}' -z -A #{ENV['USER']}")
         puts("Test")
-
-        src.each do |key, array|
-          array.each do |key2, array2|
-            src[key][key2] = ""
-          end
-        end
 
         # Return just the keys since that is all we care about.
         puts src
