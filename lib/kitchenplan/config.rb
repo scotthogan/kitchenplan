@@ -6,6 +6,7 @@ require 'deep_merge'
 require 'securerandom'
 # Used for data bag stuff
 require 'json'
+require "chef-vault"
 
 module Kitchenplan
 
@@ -133,8 +134,13 @@ module Kitchenplan
 
         # Actaully create the vault that is used :D
         puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
-        system("sudo vendor/bin/knife vault delete secret_vault secret_attributes -z")
-        system("sudo vendor/bin/knife vault create secret_vault secret_attributes '#{src.to_json}' -z -A #{ENV['USER']}")
+        
+        chef_vault_secret 'secret_attributes' do
+          data_bag 'secret_vault'
+          raw_data({src})
+          admins '${ENV[\'USERS\']}'
+        end
+        
         puts("Test")
 
         src.each do |key, array|
