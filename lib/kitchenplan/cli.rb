@@ -91,7 +91,7 @@ module Kitchenplan
 
       def run_chef(targetdir, recipes, solo_rb, config_json, debug=false)
         inside("#{targetdir}/kitchenplan") do
-          dorun "echo '#{config_json}' | sudo vendor/bin/chef-solo #{( debug ? ' --log_level debug' : ' ' )} -c #{solo_rb} -j /dev/stdin -o #{recipes.join(',')}"
+          dorun("echo '#{config_json}' | sudo vendor/bin/chef-solo #{( debug ? ' --log_level debug' : ' ' )} -c #{solo_rb} -j /dev/stdin -o #{recipes.join(',')}", true)
         end
       end
 

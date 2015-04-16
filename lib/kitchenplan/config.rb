@@ -121,6 +121,7 @@ module Kitchenplan
       # lastly override from the system files
       Config.deep_merge_configs(@system_config[config_key], config[config_key])
     end
+    
     def self.deep_merge_configs(src, dest)
       src = src || {}
       dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
