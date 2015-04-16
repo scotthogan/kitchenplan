@@ -298,8 +298,8 @@ module Kitchenplan
         return input
       end
 
-      def dorun(command, capture=false)
-        status = run(command.chomp, config = {:capture => capture})
+      def dorun(command, verbose=false)
+        status = run(command.chomp, config = {:verbose => verbose})
         if capture
           return status
         end
