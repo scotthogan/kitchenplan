@@ -121,17 +121,6 @@ module Kitchenplan
       # lastly override from the system files
       Config.deep_merge_configs(@system_config[config_key], config[config_key])
     end
-
-    def self.create_key_with_data_bag(src)
-      unless src.nil?
-        # This method will get removed.. before it sanitized the data but we don't care
-        # about that anymore
-        puts JSON.pretty_generate(src)
-      end
-
-      return src
-    end
-
     def self.deep_merge_configs(src, dest)
       src = src || {}
       dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
@@ -139,9 +128,7 @@ module Kitchenplan
 
     # Creates a key and stores it in the attributes json file
     def self.deep_merge_secret_configs(src, dest)
-      src = create_key_with_data_bag(src) || {}
       dest.deep_merge!(src) { |key, old, new| Array.wrap(old) + Array.wrap(new) }
-      puts src # REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEMMMMMMMMMMOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOVVVVEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE MEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     end 
 
     # Fetches the value at a path in a nested hash or nil if the path is not present.
