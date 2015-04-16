@@ -300,7 +300,7 @@ module Kitchenplan
 
       def dorun(command, verbose=false)
         status = run(command.chomp, config = {:verbose => verbose})
-        if capture
+        if verbose
           return status
         end
         unless status
