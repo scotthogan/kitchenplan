@@ -6,7 +6,6 @@ require 'deep_merge'
 require 'securerandom'
 # Used for data bag stuff
 require 'json'
-require "chef-vault"
 
 module Kitchenplan
 
@@ -125,32 +124,9 @@ module Kitchenplan
 
     def self.create_key_with_data_bag(src)
       unless src.nil?
-        # Configure knife!
-        system("sudo vendor/bin/knife configure -z")
-        
-        # Create a user in knife. For some reason it didn't want to accept one that i made externally
-        puts("Running Command: sudo knife user create devadmin -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -a -p password -z")
-        system("sudo vendor/bin/knife user create #{ENV['USER']} -f /Users/#{ENV['USER']}/.chef/#{ENV['USER']}.pem -e vim -a -p password -z")     
-
-        # Actaully create the vault that is used :D
-        puts("Running Command: knife vault create secret_vault secret_attributes '#{src.to_json}' -z")
-        
-        chef_vault_secret 'secret_attributes' do
-          data_bag 'secret_vault'
-          raw_data({src})
-          admins '${ENV[\'USERS\']}'
-        end
-        
-        puts("Test")
-
-        src.each do |key, array|
-          array.each do |key2, array2|
-            src[key][key2] = ""
-          end
-        end
-
-        # Return just the keys since that is all we care about.
-        puts src
+        # This method will get removed.. before it sanitized the data but we don't care
+        # about that anymore
+        puts JSON.pretty_generate(src)
       end
 
       return src
