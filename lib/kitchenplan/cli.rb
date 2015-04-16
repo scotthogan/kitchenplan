@@ -78,10 +78,10 @@ module Kitchenplan
       install_bundler(targetdir)
       recipes, attributes, input_attributes, input_secret_attributes = parse_config()
       collect_user_inputs(input_attributes, input_secret_attributes, attributes)
-      write_config(attributes, targetdir)
+      config_json = create_config(attributes, targetdir)
       fetch_cookbooks(targetdir, options[:debug]) unless options['no-fetch']
       #collect_user_inputs
-      run_chef(targetdir, (options[:recipes] ? options[:recipes] : recipes), options[:solorb], options[:debug])
+      run_chef(targetdir, (options[:recipes] ? options[:recipes] : recipes), options[:solorb], config_json, options[:debug])
       cleanup(targetdir, options[:debug])
       Process.kill(9, pid)
       print_notice('Installation complete!')
@@ -89,9 +89,9 @@ module Kitchenplan
 
     no_commands do
 
-      def run_chef(targetdir, recipes, solo_rb, debug=false)
+      def run_chef(targetdir, recipes, solo_rb, config_json, debug=false)
         inside("#{targetdir}/kitchenplan") do
-          dorun "sudo vendor/bin/chef-solo #{( debug ? ' --log_level debug' : ' ' )} -c #{solo_rb} -j tmp/kitchenplan-attributes.json -o #{recipes.join(',')}"
+          dorun "echo '#{config_json}' | sudo vendor/bin/chef-solo #{( debug ? ' --log_level debug' : ' ' )} -c #{solo_rb} -j /dev/stdin -o #{recipes.join(',')}"
         end
       end
 
@@ -125,19 +125,20 @@ module Kitchenplan
         return config.config['recipes'], config.config['attributes'], config.config['input_attributes'], config.config['input_secret_attributes']
       end
 
-      def write_config(attributes, targetdir)
+      def create_config(attributes, targetdir)
         print_step('Writing configuration files')
         require 'json'
         inside("#{targetdir}/kitchenplan") do
           dorun('mkdir -p tmp')
-          File.open('tmp/kitchenplan-attributes.json', 'w') do |out|
-            out.write(JSON.pretty_generate(attributes))
-          end
+          #File.open('tmp/kitchenplan-attributes.json', 'w') do |out|
+            #out.write(JSON.pretty_generate(attributes))
+          #end
           File.open('tmp/solo.rb', 'w') do |out|
             out.write("cookbook_path      [ \"#{Dir.pwd}/vendor/cookbooks\" ]\n")
             out.write("ssl_verify_mode :verify_peer")
           end
         end
+        return JSON.pretty_generate(attributes)
       end
 
       def fetch(gitrepo, targetdir)
