@@ -299,7 +299,7 @@ module Kitchenplan
       end
 
       def dorun(command, capture=false)
-        status = run(command.chomp, :capture => capture)
+        status = run(command.chomp, config = {:capture => capture})
         if capture
           return status
         end
