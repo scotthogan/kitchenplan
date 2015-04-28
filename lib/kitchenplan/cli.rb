@@ -71,7 +71,7 @@ module Kitchenplan
     def provision(targetdir='/opt')
       logo
       pid = Process.fork do
-        dorun "while true; do sudo -n true; sleep 60; kill -0 \"$$\" || exit; done 2>/dev/null"
+        dorun "while true; do echo "Sudo \n" sudo -n true; sleep 60; kill -0 \"$$\" || exit; done 2>/dev/null"
       end
       Process.detach pid
       prepare_folders(targetdir)
