@@ -1,11 +1,8 @@
 require 'yaml'
 require 'etc'
-#require 'ohai'
 require 'erb'
 require 'deep_merge'
 require 'securerandom'
-# Used for data bag stuff
-require 'json'
 
 module Kitchenplan
 
