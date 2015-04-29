@@ -3,7 +3,7 @@ require 'etc'
 require 'erb'
 require 'deep_merge'
 require 'securerandom'
-
+ 
 module Kitchenplan
 
   class Config
